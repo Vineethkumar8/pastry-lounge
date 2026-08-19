@@ -17,7 +17,7 @@ const defaultProducts = [
 const storageKey = "pastry-lounge-menu";
 const publicEmail = "orders@yourbakery.com";
 const publicAddress = "Your bakery address here";
-const publicWhatsAppNumber = "";
+const publicWhatsAppNumber = "1234";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
