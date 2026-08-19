@@ -29,7 +29,8 @@ function App() {
   const [newItem, setNewItem] = useState({
     name: "",
     price: "",
-    image: cakeImg,
+    imageFile: null,
+    imagePreview: "",
   });
   const [cart, setCart] = useState([]);
   const [orderForm, setOrderForm] = useState({
@@ -121,8 +122,23 @@ function App() {
     setNewItem((current) => ({ ...current, [name]: value }));
   };
 
-  const handleImageSelect = (event) => {
-    setNewItem((current) => ({ ...current, image: event.target.value }));
+  const handleImageUpload = (event) => {
+    const file = event.target.files?.[0] || null;
+
+    if (!file) {
+      setNewItem((current) => ({ ...current, imageFile: null, imagePreview: "" }));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setNewItem((current) => ({
+        ...current,
+        imageFile: file,
+        imagePreview: typeof reader.result === "string" ? reader.result : "",
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAddMenuItem = (event) => {
@@ -137,11 +153,11 @@ function App() {
       id: Date.now(),
       name: newItem.name.trim(),
       price: Number(newItem.price),
-      image: newItem.image,
+      image: newItem.imagePreview || "",
     };
 
     setProducts((current) => [nextItem, ...current]);
-    setNewItem({ name: "", price: "", image: cakeImg });
+    setNewItem({ name: "", price: "", imageFile: null, imagePreview: "" });
   };
 
   const handleAdminLogin = (event) => {
@@ -352,13 +368,16 @@ function App() {
               <input name="price" type="number" min="1" value={newItem.price} onChange={handleNewItemChange} placeholder="120" />
             </label>
             <label>
-              Image
-              <select value={newItem.image} onChange={handleImageSelect}>
-                <option value={cakeImg}>Cupcake image</option>
-                <option value={cakesImg}>Cake image</option>
-                <option value={donutsImg}>Donut image</option>
-              </select>
+              Upload image from device
+              <input type="file" accept="image/*" onChange={handleImageUpload} />
             </label>
+            <button
+              className="ghost-btn"
+              type="button"
+              onClick={() => setNewItem((current) => ({ ...current, imageFile: null, imagePreview: "" }))}
+            >
+              Remove image
+            </button>
             <button className="submit-btn" type="submit">Add item</button>
           </form>
         </section>

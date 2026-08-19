@@ -9,7 +9,13 @@ function Menu({ onAddToCart, onIncreaseItem, onDecreaseItem, products, cartQuant
       <div className="menu-grid">
         {products.map((item) => (
           <div key={item.id} className="menu-card">
-            <img src={item.image} alt={item.name} className="menu-image" />
+            {item.image ? (
+              <img src={item.image} alt={item.name} className="menu-image" />
+            ) : (
+              <div className="menu-image menu-image-placeholder">
+                <span>No image</span>
+              </div>
+            )}
             <h3>{item.name}</h3>
             <p className="price">₹{item.price}</p>
             {cartQuantities[item.id] ? (

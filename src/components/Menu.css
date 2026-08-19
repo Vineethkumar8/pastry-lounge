@@ -48,6 +48,14 @@
   object-fit: cover;
 }
 
+.menu-image-placeholder {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(217, 91, 111, 0.12), rgba(255, 141, 107, 0.12));
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
 .menu-card h3,
 .menu-card .price,
 .menu-card .order-btn {
