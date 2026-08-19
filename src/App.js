@@ -16,15 +16,14 @@ const defaultProducts = [
 
 const storageKey = "pastry-lounge-menu";
 const publicEmail = "orders@yourbakery.com";
-const publicPhone = "919876543210";
 const publicAddress = "Your bakery address here";
+const publicNumber = "1234"
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
-  const [cartOpen, setCartOpen] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [products, setProducts] = useState(defaultProducts);
   const [newItem, setNewItem] = useState({
@@ -108,7 +107,6 @@ function App() {
 
       return [...current, { ...product, quantity: 1 }];
     });
-    setCartOpen(true);
   };
 
   const handleNewItemChange = (event) => {
@@ -187,9 +185,29 @@ function App() {
     window.location.href = `mailto:${publicEmail}?subject=${subject}&body=${body}`;
   };
 
-  const handleWhatsAppOrder = () => {
-    const text = encodeURIComponent(orderMessage);
-    window.open(`https://wa.me/${publicPhone}?text=${text}`, "_blank", "noopener,noreferrer");
+  const handleShareOrder = async () => {
+    const shareData = {
+      title: "Pastry Lounge order",
+      text: orderMessage,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // fall through to clipboard copy
+      }
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(orderMessage);
+      window.alert("Order details copied. You can paste them into WhatsApp or any chat app.");
+      return;
+    }
+
+    window.alert(orderMessage);
   };
 
   const handleSubmit = (event) => {
@@ -202,7 +220,6 @@ function App() {
 
     handleEmailOrder();
     setOrderSuccess(true);
-    setCartOpen(true);
     window.setTimeout(() => setOrderSuccess(false), 5000);
   };
 
@@ -231,7 +248,7 @@ function App() {
           <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
           <a href="#order" onClick={() => setMenuOpen(false)}>Order</a>
           <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
-          <button className="nav-admin-btn" type="button" onClick={() => setCartOpen(true)}>
+          <button className="nav-admin-btn" type="button" onClick={() => document.getElementById("order")?.scrollIntoView({ behavior: "smooth" })}>
             Cart ({cartSummary.itemCount})
           </button>
           {adminIsAuthenticated ? (
@@ -418,7 +435,7 @@ function App() {
             <p className="section-tag">Place order</p>
             <h2>Contact and delivery details</h2>
             <p className="section-copy">
-              Fill in the details below and send it by email or WhatsApp. It’s a quick checkout flow that works well on mobile.
+              Fill in the details below and place the order right here. The flow is kept on one page like a food delivery app.
             </p>
           </div>
           <div className="checkout-note">
@@ -442,73 +459,12 @@ function App() {
           </label>
           <div className="order-actions">
             <button className="submit-btn" type="submit">Email order</button>
-            <button className="whatsapp-btn" type="button" onClick={handleWhatsAppOrder}>
-              Send on WhatsApp
+            <button className="whatsapp-btn" type="button" onClick={handleShareOrder}>
+              Share order
             </button>
           </div>
         </form>
       </section>
-
-      <aside className={`cart-drawer ${cartOpen ? "open" : ""}`} aria-hidden={!cartOpen}>
-        <div className="cart-drawer-backdrop" onClick={() => setCartOpen(false)} />
-        <div className="cart-drawer-panel" role="dialog" aria-label="Cart drawer">
-          <div className="panel-head">
-            <div className="order-copy">
-              <p className="section-tag">Cart drawer</p>
-              <h2>Your order</h2>
-              <p className="section-copy">A quick view of what’s inside the cart, with totals kept visible.</p>
-            </div>
-            <button className="ghost-btn" type="button" onClick={() => setCartOpen(false)}>
-              Close
-            </button>
-          </div>
-          {cart.length === 0 ? (
-            <div className="cart-empty-visual">
-              <p className="empty-state">Your cart is empty right now.</p>
-              <p className="section-copy">Add something sweet from the menu to start building the order.</p>
-            </div>
-          ) : (
-            <div className="cart-list">
-              {cart.map((item) => (
-                <div key={item.id} className="cart-item">
-                  <img src={item.image} alt={item.name} className="cart-thumb" />
-                  <div className="cart-item-copy">
-                    <strong>{item.name}</strong>
-                    <p>₹{item.price} each</p>
-                  </div>
-                  <div className="cart-actions">
-                    <div className="quantity-controls">
-                      <button type="button" onClick={() => updateQuantity(item.id, -1)}>-</button>
-                      <span>{item.quantity}</span>
-                      <button type="button" onClick={() => updateQuantity(item.id, 1)}>+</button>
-                    </div>
-                    <button className="remove-btn" type="button" onClick={() => removeItem(item.id)}>
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="cart-summary-strip">
-            <div className="cart-summary-row">
-              <span>Subtotal</span>
-              <strong>₹{cartSummary.total}</strong>
-            </div>
-            <div className="cart-summary-row">
-              <span>Delivery</span>
-              <strong>₹{deliveryFee}</strong>
-            </div>
-            <div className="cart-summary-row">
-              <span>Grand total</span>
-              <strong>₹{grandTotal}</strong>
-            </div>
-          </div>
-          <button className="submit-btn cart-drawer-btn" type="button" onClick={() => setCartOpen(false)}>
-            Continue shopping
-          </button>
-        </div>
-      </aside>
 
       {orderSuccess && (
         <div className="success-toast" role="status" aria-live="polite">
@@ -527,7 +483,7 @@ function App() {
           <p className="section-tag">Contact</p>
           <h2>Visit or message us</h2>
           <p>{publicAddress}</p>
-          <p>+91 98765 43210</p>
+          <p>{publicNumber}</p>
           <p>{publicEmail}</p>
         </div>
         <div className="hours-card">
