@@ -17,7 +17,7 @@ const defaultProducts = [
 const storageKey = "pastry-lounge-menu";
 const publicEmail = "orders@yourbakery.com";
 const publicAddress = "Your bakery address here";
-const publicWhatsAppNumber = "1234";
+const adminContactsKey = "pastry-lounge-contacts";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,6 +26,7 @@ function App() {
   const [adminError, setAdminError] = useState("");
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [products, setProducts] = useState(defaultProducts);
+  const [publicWhatsAppNumber, setPublicWhatsAppNumber] = useState("");
   const [newItem, setNewItem] = useState({
     name: "",
     price: "",
@@ -55,8 +56,29 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const savedContacts = window.localStorage.getItem(adminContactsKey);
+    if (savedContacts) {
+      try {
+        const parsed = JSON.parse(savedContacts);
+        if (parsed && typeof parsed.whatsappNumber === "string") {
+          setPublicWhatsAppNumber(parsed.whatsappNumber);
+        }
+      } catch {
+        window.localStorage.removeItem(adminContactsKey);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(products));
   }, [products]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      adminContactsKey,
+      JSON.stringify({ whatsappNumber: publicWhatsAppNumber })
+    );
+  }, [publicWhatsAppNumber]);
 
   const cartSummary = useMemo(() => {
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -160,6 +182,10 @@ function App() {
     setNewItem({ name: "", price: "", imageFile: null, imagePreview: "" });
   };
 
+  const handleContactChange = (event) => {
+    setPublicWhatsAppNumber(event.target.value);
+  };
+
   const handleAdminLogin = (event) => {
     event.preventDefault();
 
@@ -232,7 +258,7 @@ function App() {
 
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(orderMessage);
-      window.alert("Order details copied. Add your WhatsApp number in the code later, or paste this into WhatsApp now.");
+      window.alert("Order details copied. Add your WhatsApp number in the admin panel later, or paste this into WhatsApp now.");
       return;
     }
 
@@ -277,18 +303,35 @@ function App() {
           <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
           <a href="#order" onClick={() => setMenuOpen(false)}>Order</a>
           <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
-          <button className="nav-admin-btn" type="button" onClick={() => document.getElementById("order")?.scrollIntoView({ behavior: "smooth" })}>
+          <button
+            className="nav-admin-btn"
+            type="button"
+            onClick={() => {
+              setMenuOpen(false);
+              document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
             Cart ({cartSummary.itemCount})
           </button>
           {adminIsAuthenticated ? (
-            <button className="nav-admin-btn" type="button" onClick={handleAdminLogout}>
+            <button
+              className="nav-admin-btn"
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                handleAdminLogout();
+              }}
+            >
               Logout
             </button>
           ) : (
             <button
               className="nav-admin-btn"
               type="button"
-              onClick={() => document.getElementById("admin")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => {
+                setMenuOpen(false);
+                document.getElementById("admin")?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               Admin
             </button>
@@ -379,6 +422,21 @@ function App() {
               Remove image
             </button>
             <button className="submit-btn" type="submit">Add item</button>
+          </form>
+
+          <form className="admin-form admin-contact-form" onSubmit={(event) => event.preventDefault()}>
+            <label>
+              Public WhatsApp number
+              <input
+                type="tel"
+                value={publicWhatsAppNumber}
+                onChange={handleContactChange}
+                placeholder="919876543210"
+              />
+            </label>
+            <p className="section-copy">
+              Leave this empty if you do not want WhatsApp sharing to open a fixed number yet.
+            </p>
           </form>
         </section>
       )}
@@ -521,7 +579,7 @@ function App() {
           <p className="section-tag">Contact</p>
           <h2>Visit or message us</h2>
           <p>{publicAddress}</p>
-          <p>WhatsApp number can be added later</p>
+          <p>{publicWhatsAppNumber ? `WhatsApp: +${publicWhatsAppNumber}` : "WhatsApp number can be added later"}</p>
           <p>{publicEmail}</p>
         </div>
         <div className="hours-card">
