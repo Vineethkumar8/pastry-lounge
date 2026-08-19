@@ -1,7 +1,7 @@
 import React from "react";
 import "./Menu.css"; // We'll create this CSS file
 
-function Menu({ onAddToCart, products }) {
+function Menu({ onAddToCart, onIncreaseItem, onDecreaseItem, products, cartQuantities }) {
   return (
     <section className="menu-section" id="menu">
       <h2>Our Delicious Menu</h2>
@@ -12,9 +12,17 @@ function Menu({ onAddToCart, products }) {
             <img src={item.image} alt={item.name} className="menu-image" />
             <h3>{item.name}</h3>
             <p className="price">₹{item.price}</p>
-            <button className="order-btn" type="button" onClick={() => onAddToCart(item)}>
-              Add to Cart
-            </button>
+            {cartQuantities[item.id] ? (
+              <div className="menu-qty-controls">
+                <button type="button" className="qty-btn" onClick={() => onDecreaseItem(item.id, -1)}>-</button>
+                <span className="qty-value">{cartQuantities[item.id]}</span>
+                <button type="button" className="qty-btn" onClick={() => onIncreaseItem(item.id, 1)}>+</button>
+              </div>
+            ) : (
+              <button className="order-btn" type="button" onClick={() => onAddToCart(item)}>
+                Add to Cart
+              </button>
+            )}
           </div>
         ))}
       </div>

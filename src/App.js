@@ -17,7 +17,7 @@ const defaultProducts = [
 const storageKey = "pastry-lounge-menu";
 const publicEmail = "orders@yourbakery.com";
 const publicAddress = "Your bakery address here";
-const publicNumber = "1234"
+const publicWhatsAppNumber = "";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -61,6 +61,13 @@ function App() {
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     return { itemCount, total };
+  }, [cart]);
+
+  const cartQuantities = useMemo(() => {
+    return cart.reduce((accumulator, item) => {
+      accumulator[item.id] = item.quantity;
+      return accumulator;
+    }, {});
   }, [cart]);
 
   const deliveryFee = cartSummary.total > 0 ? 40 : 0;
@@ -186,6 +193,12 @@ function App() {
   };
 
   const handleShareOrder = async () => {
+    if (publicWhatsAppNumber.trim()) {
+      const text = encodeURIComponent(orderMessage);
+      window.open(`https://wa.me/${publicWhatsAppNumber.trim()}?text=${text}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+
     const shareData = {
       title: "Pastry Lounge order",
       text: orderMessage,
@@ -203,7 +216,7 @@ function App() {
 
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(orderMessage);
-      window.alert("Order details copied. You can paste them into WhatsApp or any chat app.");
+      window.alert("Order details copied. Add your WhatsApp number in the code later, or paste this into WhatsApp now.");
       return;
     }
 
@@ -283,7 +296,13 @@ function App() {
         </div>
       </section>
 
-      <Menu onAddToCart={addToCart} products={products} />
+      <Menu
+        onAddToCart={addToCart}
+        onIncreaseItem={updateQuantity}
+        onDecreaseItem={updateQuantity}
+        products={products}
+        cartQuantities={cartQuantities}
+      />
 
       {!adminIsAuthenticated ? (
         <section className="admin-section" id="admin">
@@ -483,7 +502,7 @@ function App() {
           <p className="section-tag">Contact</p>
           <h2>Visit or message us</h2>
           <p>{publicAddress}</p>
-          <p>{publicNumber}</p>
+          <p>WhatsApp number can be added later</p>
           <p>{publicEmail}</p>
         </div>
         <div className="hours-card">

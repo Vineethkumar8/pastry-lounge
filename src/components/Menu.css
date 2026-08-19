@@ -78,3 +78,34 @@
   font-weight: 800;
   cursor: pointer;
 }
+
+.menu-qty-controls {
+  width: calc(100% - 32px);
+  margin: 0 16px 16px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(217, 91, 111, 0.12), rgba(255, 141, 107, 0.12));
+  border: 1px solid rgba(217, 91, 111, 0.15);
+}
+
+.qty-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--accent-dark);
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(73, 34, 34, 0.08);
+}
+
+.qty-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 900;
+  color: var(--text);
+}
