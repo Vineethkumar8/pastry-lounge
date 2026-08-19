@@ -1,0 +1,14 @@
+.footer {
+  width: min(1160px, calc(100% - 24px));
+  margin: 18px auto 22px;
+  padding: 18px 20px;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(135deg, #d95b6f, #b83b52);
+  border-radius: 22px;
+  box-shadow: 0 16px 36px rgba(185, 59, 82, 0.2);
+}
+
+.footer p {
+  margin: 0;
+}
